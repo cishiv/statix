@@ -11,6 +11,6 @@ export function Content({ html, title }: ContentProps): preact.JSX.Element {
   }, [title]);
 
   return (
-    <article class="content" dangerouslySetInnerHTML={{ __html: html }} />
+    <article key={title} class="content fade-in-up" dangerouslySetInnerHTML={{ __html: html }} />
   );
 }

@@ -4,6 +4,8 @@ export type Page = {
   order: number;
   hidden: boolean;
   html: string;
+  date: string | null;
+  updated: string | null;
 };
 
 export type NavNode = {
