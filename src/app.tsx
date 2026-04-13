@@ -51,7 +51,7 @@ export function App(): preact.JSX.Element {
           title={title}
           onToggle={() => setSidebarOpen((prev) => !prev)}
         />
-        <Content html={html} title={title} />
+        <Content html={html} title={title} onNavigate={navigate} />
       </div>
       {sidebarOpen && (
         <div class="backdrop" onClick={() => setSidebarOpen(false)} />
