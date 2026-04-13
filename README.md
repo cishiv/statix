@@ -45,6 +45,8 @@ Each file supports optional YAML frontmatter:
 title: Installation        # displayed in sidebar and browser tab (default: filename as Title Case)
 order: 1                   # sort position within directory (default: alphabetical)
 hidden: false              # if true, accessible via URL but hidden from sidebar
+date: 2026-04-01           # original publish date; rendered as a dateline under the H1
+updated: 2026-04-13        # optional; shown alongside published date when different
 ---
 ```
 
@@ -52,10 +54,13 @@ hidden: false              # if true, accessible via URL but hidden from sidebar
 
 - **Sidebar navigation** — auto-generated from your file tree, up to 3 levels deep
 - **Syntax highlighting** — code blocks highlighted via highlight.js (JS, TS, Python, Bash, JSON, YAML, CSS, HTML)
+- **Inline images** — drop images next to your markdown and reference them with relative paths; they're synced to `public/_docs/` and watched in dev
+- **Published / updated dates** — `date` and `updated` frontmatter render as a dateline beneath the page title
+- **Refined typography** — Inter + Roboto Mono, tuned heading rhythm, subtle fade-in on navigation (respects `prefers-reduced-motion`)
 - **Light/dark mode** — follows your OS preference via `prefers-color-scheme`
 - **Mobile responsive** — hamburger menu with overlay sidebar below 768px
 - **Fast builds** — entire site is a client-side SPA with content baked in at build time
-- **Hot reload** — markdown changes reflect instantly during development
+- **Hot reload** — markdown and image changes reflect instantly during development
 
 ## Customization
 
@@ -102,7 +107,8 @@ EXPOSE 8080
 ├── scripts/
 │   ├── build-content.ts       # markdown scanning/parsing pipeline
 │   └── build-content.test.ts  # unit tests
-├── docs/                      # your markdown content
+├── docs/                      # your markdown content (and co-located images)
+├── public/_docs/              # generated: images mirrored from docs/ (gitignored)
 ├── vite.config.ts             # vite + preact + markdown HMR plugin
 ├── Dockerfile
 └── nginx.conf
