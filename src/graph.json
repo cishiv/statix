@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    {
+      "id": "/getting-started/configuration",
+      "title": "Configuration",
+      "group": "getting-started",
+      "hidden": false
+    },
+    {
+      "id": "/getting-started",
+      "title": "Getting Started",
+      "group": "getting-started",
+      "hidden": false
+    },
+    {
+      "id": "/getting-started/installation",
+      "title": "Installation",
+      "group": "getting-started",
+      "hidden": false
+    },
+    {
+      "id": "/",
+      "title": "Welcome",
+      "group": "root",
+      "hidden": false
+    }
+  ],
+  "edges": []
+}

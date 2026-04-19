@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
 import contentData from "./content.json";
+import graphData from "./graph.json";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { Content } from "./components/Content.tsx";
 import { MobileHeader } from "./components/MobileHeader.tsx";
-import type { ContentData } from "./types.ts";
+import { GraphOverlay } from "./components/GraphOverlay.tsx";
+import type { ContentData, Graph } from "./types.ts";
 
 const data = contentData as ContentData;
+const graph = graphData as Graph;
 
 function getSlugFromPath(pathname: string): string {
   const slug = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
@@ -17,6 +20,7 @@ export function App(): preact.JSX.Element {
     getSlugFromPath(window.location.pathname)
   );
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [graphOpen, setGraphOpen] = useState<boolean>(false);
 
   const navigate = useCallback((slug: string): void => {
     window.history.pushState(null, "", slug === "/" ? "/" : slug);
@@ -45,6 +49,7 @@ export function App(): preact.JSX.Element {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onNavigate={navigate}
+        onOpenGraph={() => setGraphOpen(true)}
       />
       <div class="main">
         <MobileHeader
@@ -55,6 +60,14 @@ export function App(): preact.JSX.Element {
       </div>
       {sidebarOpen && (
         <div class="backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+      {graphOpen && (
+        <GraphOverlay
+          graph={graph}
+          currentSlug={currentSlug}
+          onNavigate={navigate}
+          onClose={() => setGraphOpen(false)}
+        />
       )}
     </div>
   );

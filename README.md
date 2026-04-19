@@ -47,14 +47,30 @@ order: 1                   # sort position within directory (default: alphabetic
 hidden: false              # if true, accessible via URL but hidden from sidebar
 date: 2026-04-01           # original publish date; rendered as a dateline under the H1
 updated: 2026-04-13        # optional; shown alongside published date when different
+group: guides              # graph node grouping (default: inferred from URL structure)
+hide_in_graph: false       # if true, excluded from the knowledge graph
 ---
 ```
+
+### Wikilinks
+
+Cross-reference pages using `[[Page Name]]` syntax. Links are resolved by filename, title, or slug (case-insensitive):
+
+```markdown
+See [[Installation]] for setup steps.
+Read the [[deployment|deploy guide]] for production.
+```
+
+Unresolved wikilinks render as broken links and are reported during the build.
 
 ## Features
 
 - **Sidebar navigation** — auto-generated from your file tree, up to 3 levels deep
+- **Wikilinks** — `[[Page Name]]` syntax resolved at build time; broken links reported to console
+- **Knowledge graph** — interactive force-directed graph (d3-force) showing page link topology; text fallback on mobile
+- **Backlinks** — each page lists "Referenced by" links automatically derived from wikilinks
 - **Syntax highlighting** — code blocks highlighted via highlight.js (JS, TS, Python, Bash, JSON, YAML, CSS, HTML)
-- **Inline images** — drop images next to your markdown and reference them with relative paths; they're synced to `public/_docs/` and watched in dev
+- **Inline images** — drop images next to your markdown and reference them with relative paths; synced to `public/_docs/` and watched in dev
 - **Published / updated dates** — `date` and `updated` frontmatter render as a dateline beneath the page title
 - **Refined typography** — Inter + Roboto Mono, tuned heading rhythm, subtle fade-in on navigation (respects `prefers-reduced-motion`)
 - **Light/dark mode** — follows your OS preference via `prefers-color-scheme`
@@ -98,15 +114,22 @@ EXPOSE 8080
 ├── src/
 │   ├── app.tsx                # root component, routing, layout
 │   ├── components/
-│   │   ├── Sidebar.tsx        # collapsible nav tree
+│   │   ├── Sidebar.tsx        # collapsible nav tree + graph button
 │   │   ├── Content.tsx        # rendered markdown display
+│   │   ├── GraphOverlay.tsx   # graph modal (canvas on desktop, list on mobile)
+│   │   ├── GraphCanvas.tsx    # force-directed graph visualization
+│   │   ├── GraphFallback.tsx  # mobile text-based graph list
 │   │   └── MobileHeader.tsx   # hamburger menu bar
 │   ├── styles.css             # all styles, light/dark mode
 │   ├── types.ts               # shared type definitions
 │   └── main.tsx               # entry point
 ├── scripts/
-│   ├── build-content.ts       # markdown scanning/parsing pipeline
-│   └── build-content.test.ts  # unit tests
+│   ├── build-content.ts       # markdown scanning/parsing/graph pipeline
+│   ├── build-content.test.ts  # unit tests
+│   ├── markdown-wikilink.ts   # markdown-it wikilink plugin
+│   ├── markdown-wikilink.test.ts
+│   ├── wikilink-resolver.ts   # wikilink target resolution
+│   └── wikilink-resolver.test.ts
 ├── docs/                      # your markdown content (and co-located images)
 ├── public/_docs/              # generated: images mirrored from docs/ (gitignored)
 ├── vite.config.ts             # vite + preact + markdown HMR plugin

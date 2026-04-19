@@ -86,6 +86,9 @@ html {
 }
 
 .sidebar-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: 28px 0;
 }
 
@@ -152,15 +155,277 @@ html {
 
 .nav-chevron {
   display: inline-block;
-  font-size: 0.6rem;
-  color: var(--color-text-secondary);
-  transition: transform 0.2s ease;
   flex-shrink: 0;
-  width: 12px;
+  width: 10px;
+  height: 10px;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .nav-chevron-open {
   transform: rotate(90deg);
+}
+
+.nav-link:hover .nav-chevron {
+  color: var(--color-text);
+}
+
+/* ========== Sidebar Footer ========== */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.graph-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  margin: 0 -10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.graph-button:hover {
+  color: var(--color-text);
+  background: var(--color-sidebar-active);
+}
+
+.graph-button-icon {
+  stroke: currentColor;
+  stroke-width: 1.4;
+  fill: none;
+}
+
+.graph-button-icon circle {
+  fill: currentColor;
+}
+
+/* ========== Wikilinks ========== */
+.content a.wikilink {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.content a.wikilink:hover {
+  text-decoration-color: var(--color-text);
+}
+
+.content .wikilink-broken {
+  color: var(--color-text-secondary);
+  text-decoration: underline dashed;
+  text-decoration-color: var(--color-border);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/* ========== Referenced by ========== */
+.content .referenced-by {
+  margin-top: 3em;
+  padding-top: 1.5em;
+  border-top: 1px solid var(--color-border);
+}
+
+.content .referenced-by h2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding: 0;
+  border: none;
+  margin: 0 0 0.75em;
+}
+
+.content .referenced-by ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content .referenced-by li {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* ========== Graph Overlay ========== */
+.graph-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(10px);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  animation: graphFadeIn 0.18s ease-out both;
+}
+
+@keyframes graphFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.graph-overlay-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 32px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.graph-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.graph-overlay-title {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.graph-overlay-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0 6px;
+  transition: color 0.2s ease;
+}
+
+.graph-overlay-close:hover {
+  color: var(--color-text);
+}
+
+.graph-overlay-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.graph-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.graph-canvas:active {
+  cursor: grabbing;
+}
+
+.graph-edge {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  transition: stroke 0.15s ease, opacity 0.15s ease;
+}
+
+.graph-node {
+  cursor: pointer;
+}
+
+.graph-node circle {
+  transition: r 0.15s ease, opacity 0.15s ease;
+}
+
+.graph-node:hover circle {
+  r: 8;
+}
+
+.graph-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--color-text-secondary);
+  text-anchor: middle;
+  pointer-events: none;
+  transition: fill 0.15s ease, opacity 0.15s ease;
+}
+
+.graph-node:hover .graph-label {
+  fill: var(--color-text);
+}
+
+.graph-current circle {
+  stroke: var(--color-text);
+  stroke-width: 2;
+}
+
+.graph-current .graph-label {
+  fill: var(--color-text);
+  font-weight: 500;
+}
+
+.graph-dim {
+  opacity: 0.2;
+}
+
+/* ========== Graph Fallback ========== */
+.graph-fallback {
+  padding: 24px 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.graph-fallback-section {
+  margin-bottom: 2em;
+}
+
+.graph-fallback-section h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5em;
+}
+
+.graph-fallback ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.graph-fallback li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.graph-fallback a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.graph-fallback-meta {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 /* ========== Content ========== */

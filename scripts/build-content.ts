@@ -11,7 +11,9 @@ import yaml from "highlight.js/lib/languages/yaml";
 import css from "highlight.js/lib/languages/css";
 import xml from "highlight.js/lib/languages/xml";
 import python from "highlight.js/lib/languages/python";
-import type { ContentData, NavNode, Page } from "../src/types.ts";
+import type { ContentData, Graph, GraphEdge, GraphNode, NavNode, Page } from "../src/types.ts";
+import { wikilinkPlugin, type WikilinkEnv } from "./markdown-wikilink.ts";
+import { buildPageIndex, type PageRef } from "./wikilink-resolver.ts";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("js", javascript);
@@ -38,6 +40,8 @@ const md = markdownIt({
     return "";
   },
 });
+
+md.use(wikilinkPlugin);
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"];
 const PUBLIC_ASSET_ROOT = "/_docs";
@@ -143,27 +147,105 @@ export function scanMarkdownFiles(docsDir: string): string[] {
   return results.sort();
 }
 
-export function parsePage(
+type PageMeta = {
+  slug: string;
+  title: string;
+  order: number;
+  hidden: boolean;
+  date: string | null;
+  updated: string | null;
+  group: string | null;
+  hideInGraph: boolean;
+  filename: string;
+  filePath: string;
+  body: string;
+};
+
+function filenameFor(filePath: string): string {
+  const base = path.basename(filePath, ".md");
+  if (base === "index") return path.basename(path.dirname(filePath));
+  return base;
+}
+
+export function parsePage(content: string, filePath: string, docsDir: string): Page {
+  const meta = parsePageMeta(content, filePath, docsDir);
+  const env: WikilinkEnv = {
+    index: buildPageIndex([]),
+    outbound: new Set<string>(),
+    broken: [],
+  };
+  const html = renderPageHtml(meta, docsDir, env);
+  return {
+    slug: meta.slug,
+    title: meta.title,
+    order: meta.order,
+    hidden: meta.hidden,
+    date: meta.date,
+    updated: meta.updated,
+    html,
+    outbound: [],
+    inbound: [],
+  };
+}
+
+export function parsePageMeta(
   content: string,
   filePath: string,
   docsDir: string
-): Page {
+): PageMeta {
   const { data: frontmatter, content: body } = matter(content);
   const slug = toSlug(filePath, docsDir);
-  const filename = path.basename(filePath, ".md");
+  const filename = filenameFor(filePath);
   const title: string =
     (frontmatter.title as string) ??
-    (filename === "index" ? toTitleCase(path.basename(path.dirname(filePath))) : toTitleCase(filename));
+    (path.basename(filePath, ".md") === "index"
+      ? toTitleCase(path.basename(path.dirname(filePath)))
+      : toTitleCase(path.basename(filePath, ".md")));
   const order: number =
     typeof frontmatter.order === "number" ? frontmatter.order : Infinity;
   const hidden: boolean = frontmatter.hidden === true;
   const date = normalizeDate(frontmatter.date);
   const updated = normalizeDate(frontmatter.updated);
-  const body_html: string = md.render(body, { pageDir: path.dirname(filePath), docsDir });
-  const dateline = renderDateline(date, updated);
-  const html = dateline ? insertAfterFirstH1(body_html, dateline) : body_html;
+  const group = typeof frontmatter.group === "string" ? frontmatter.group : null;
+  const hideInGraph = frontmatter.hide_in_graph === true;
 
-  return { slug, title, order, hidden, html, date, updated };
+  return { slug, title, order, hidden, date, updated, group, hideInGraph, filename, filePath, body };
+}
+
+function renderPageHtml(
+  meta: PageMeta,
+  docsDir: string,
+  wikilinkEnv: WikilinkEnv
+): string {
+  const env = {
+    pageDir: path.dirname(meta.filePath),
+    docsDir,
+    ...wikilinkEnv,
+  };
+  const body_html: string = md.render(meta.body, env);
+  const dateline = renderDateline(meta.date, meta.updated);
+  return dateline ? insertAfterFirstH1(body_html, dateline) : body_html;
+}
+
+function appendReferencedBy(html: string, inbound: Page[]): string {
+  if (inbound.length === 0) return html;
+  const items = inbound
+    .slice()
+    .sort((a, b) => a.title.localeCompare(b.title))
+    .map((p) => `  <li><a class="wikilink" href="${p.slug}">${escapeHtml(p.title)}</a></li>`)
+    .join("\n");
+  return (
+    html +
+    `\n<section class="referenced-by">\n<h2>Referenced by</h2>\n<ul>\n${items}\n</ul>\n</section>`
+  );
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function normalizeDate(value: unknown): string | null {
@@ -201,6 +283,31 @@ function renderDateline(date: string | null, updated: string | null): string {
   if (updated && updated !== date) parts.push(`Updated ${formatDate(updated)}`);
   if (parts.length === 0) return "";
   return `<p class="dateline">${parts.join(" · ")}</p>`;
+}
+
+function inferGroup(slug: string): string {
+  if (slug === "/") return "root";
+  const first = slug.slice(1).split("/")[0];
+  return first || "root";
+}
+
+export function buildGraph(pages: Page[], metas: Map<string, PageMeta>): Graph {
+  const nodes: GraphNode[] = pages.map((p) => {
+    const meta = metas.get(p.slug);
+    return {
+      id: p.slug,
+      title: p.title,
+      group: meta?.group ?? inferGroup(p.slug),
+      hidden: meta?.hideInGraph === true,
+    };
+  });
+  const edges: GraphEdge[] = [];
+  for (const p of pages) {
+    for (const target of p.outbound) {
+      edges.push({ source: p.slug, target });
+    }
+  }
+  return { nodes, edges };
 }
 
 export function buildNavTree(pages: Page[]): NavNode[] {
@@ -263,19 +370,111 @@ export function buildNavTree(pages: Page[]): NavNode[] {
 
   sortNodes(root.children);
 
+  const homePage = visiblePages.find((p) => p.slug === "/");
+  if (homePage) {
+    return [
+      {
+        slug: "/",
+        title: homePage.title,
+        order: homePage.order,
+        hidden: false,
+        children: [],
+      },
+      ...root.children,
+    ];
+  }
+
   return root.children;
 }
 
-export function buildContent(docsDir: string, publicDir?: string): ContentData {
+export type BuildOutput = { content: ContentData; graph: Graph };
+
+export function buildContent(docsDir: string, publicDir?: string): BuildOutput {
   const resolvedDir = path.resolve(docsDir);
   if (publicDir) {
     syncImages(resolvedDir, path.resolve(publicDir));
   }
   const filePaths = scanMarkdownFiles(resolvedDir);
-  const pages: Page[] = filePaths.map((fp) => {
+
+  const metas: PageMeta[] = filePaths.map((fp) => {
     const content = fs.readFileSync(fp, "utf-8");
-    return parsePage(content, fp, resolvedDir);
+    return parsePageMeta(content, fp, resolvedDir);
   });
+
+  const refs: PageRef[] = metas.map((m) => ({
+    slug: m.slug,
+    title: m.title,
+    filename: m.filename,
+  }));
+  const index = buildPageIndex(refs);
+
+  const renderedBodies = new Map<string, string>();
+  const outboundMap = new Map<string, Set<string>>();
+  const brokenLinks: { from: string; target: string }[] = [];
+
+  for (const meta of metas) {
+    const env: WikilinkEnv = {
+      index,
+      outbound: new Set<string>(),
+      broken: [],
+    };
+    const html = renderPageHtml(meta, resolvedDir, env);
+    renderedBodies.set(meta.slug, html);
+    outboundMap.set(meta.slug, env.outbound);
+    for (const b of env.broken) {
+      brokenLinks.push({ from: meta.slug, target: b.target });
+    }
+  }
+
+  const inboundMap = new Map<string, Set<string>>();
+  for (const meta of metas) inboundMap.set(meta.slug, new Set<string>());
+  for (const [from, targets] of outboundMap) {
+    for (const target of targets) {
+      if (from === target) continue;
+      inboundMap.get(target)?.add(from);
+    }
+  }
+
+  const pages: Page[] = metas.map((meta) => {
+    const outbound = Array.from(outboundMap.get(meta.slug) ?? []).sort();
+    const inbound = Array.from(inboundMap.get(meta.slug) ?? []).sort();
+    const baseHtml = renderedBodies.get(meta.slug) ?? "";
+    return {
+      slug: meta.slug,
+      title: meta.title,
+      order: meta.order,
+      hidden: meta.hidden,
+      date: meta.date,
+      updated: meta.updated,
+      outbound,
+      inbound,
+      html: baseHtml,
+    };
+  });
+
+  const pagesBySlug = new Map(pages.map((p) => [p.slug, p]));
+  for (const page of pages) {
+    const inboundPages = page.inbound
+      .map((s) => pagesBySlug.get(s))
+      .filter((p): p is Page => !!p && !p.hidden);
+    page.html = appendReferencedBy(page.html, inboundPages);
+  }
+
+  if (brokenLinks.length > 0) {
+    const byFrom = new Map<string, string[]>();
+    for (const b of brokenLinks) {
+      const list = byFrom.get(b.from) ?? [];
+      list.push(b.target);
+      byFrom.set(b.from, list);
+    }
+    console.warn(`\n[wikilink] ${brokenLinks.length} broken reference(s):`);
+    for (const [from, targets] of byFrom) {
+      console.warn(`  ${from}: ${targets.map((t) => `[[${t}]]`).join(", ")}`);
+    }
+  }
+
+  const metasMap = new Map(metas.map((m) => [m.slug, m]));
+  const graph = buildGraph(pages, metasMap);
 
   const nav = buildNavTree(pages);
   const pagesMap: Record<string, Page> = {};
@@ -283,7 +482,7 @@ export function buildContent(docsDir: string, publicDir?: string): ContentData {
     pagesMap[page.slug] = page;
   }
 
-  return { nav, pages: pagesMap };
+  return { content: { nav, pages: pagesMap }, graph };
 }
 
 function main(): void {
@@ -293,10 +492,12 @@ function main(): void {
     process.exit(1);
   }
 
-  const contentData = buildContent("docs", "public");
-  const outPath = path.resolve("src/content.json");
-  fs.writeFileSync(outPath, JSON.stringify(contentData, null, 2));
-  console.log(`Built content.json (${Object.keys(contentData.pages).length} pages)`);
+  const { content, graph } = buildContent("docs", "public");
+  fs.writeFileSync(path.resolve("src/content.json"), JSON.stringify(content, null, 2));
+  fs.writeFileSync(path.resolve("src/graph.json"), JSON.stringify(graph, null, 2));
+  console.log(
+    `Built content.json (${Object.keys(content.pages).length} pages) + graph.json (${graph.nodes.length} nodes, ${graph.edges.length} edges)`
+  );
 }
 
 const isDirectRun =

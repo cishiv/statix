@@ -9,13 +9,15 @@ const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".av
 
 function markdownPlugin(): Plugin {
   const contentPath = path.resolve("src/content.json");
+  const graphPath = path.resolve("src/graph.json");
   const docsDir = path.resolve("docs");
   const publicDir = path.resolve("public");
 
   const generate = (): void => {
     if (!fs.existsSync(docsDir)) return;
-    const data = buildContent("docs", "public");
-    fs.writeFileSync(contentPath, JSON.stringify(data, null, 2));
+    const { content, graph } = buildContent("docs", "public");
+    fs.writeFileSync(contentPath, JSON.stringify(content, null, 2));
+    fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2));
   };
 
   return {
@@ -39,11 +41,11 @@ function markdownPlugin(): Plugin {
     handleHotUpdate({ file, server }) {
       if (file.endsWith(".md") && file.startsWith(docsDir)) {
         generate();
-        const mod = server.moduleGraph.getModuleById(contentPath);
-        if (mod) {
-          server.moduleGraph.invalidateModule(mod);
-          return [mod];
-        }
+        const touched = [contentPath, graphPath]
+          .map((p) => server.moduleGraph.getModuleById(p))
+          .filter((m): m is NonNullable<typeof m> => !!m);
+        for (const mod of touched) server.moduleGraph.invalidateModule(mod);
+        return touched;
       }
     },
   };

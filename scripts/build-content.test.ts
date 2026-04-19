@@ -329,24 +329,24 @@ hidden: true
   });
 
   it("produces correct ContentData from a docs directory", () => {
-    const result = buildContent(tmpDir);
+    const { content } = buildContent(tmpDir);
 
-    expect(Object.keys(result.pages)).toHaveLength(3);
-    expect(result.pages["/"]).toBeDefined();
-    expect(result.pages["/"].title).toBe("Home");
-    expect(result.pages["/guides/auth"]).toBeDefined();
-    expect(result.pages["/guides/deploy"]).toBeDefined();
-    expect(result.pages["/guides/deploy"].hidden).toBe(true);
+    expect(Object.keys(content.pages)).toHaveLength(3);
+    expect(content.pages["/"]).toBeDefined();
+    expect(content.pages["/"].title).toBe("Home");
+    expect(content.pages["/guides/auth"]).toBeDefined();
+    expect(content.pages["/guides/deploy"]).toBeDefined();
+    expect(content.pages["/guides/deploy"].hidden).toBe(true);
   });
 
   it("excludes hidden pages from nav but keeps them in pages map", () => {
-    const result = buildContent(tmpDir);
+    const { content } = buildContent(tmpDir);
 
-    const guidesNav = result.nav.find((n) => n.slug === "/guides");
+    const guidesNav = content.nav.find((n) => n.slug === "/guides");
     expect(guidesNav).toBeDefined();
     expect(guidesNav!.children).toHaveLength(1);
     expect(guidesNav!.children[0].title).toBe("Authentication");
 
-    expect(result.pages["/guides/deploy"]).toBeDefined();
+    expect(content.pages["/guides/deploy"]).toBeDefined();
   });
 });

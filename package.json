@@ -11,8 +11,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "highlight.js": "^11.11.1",
+    "@types/d3-force": "^3.0.10",
+    "d3-force": "^3.0.0",
     "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
     "preact": "^10.25.4",
     "preact-router": "^4.1.2"

@@ -7,6 +7,7 @@ type SidebarProps = {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (slug: string) => void;
+  onOpenGraph: () => void;
 };
 
 type NavTreeProps = {
@@ -71,9 +72,15 @@ function NavItem({ node, depth, currentSlug, onNavigate }: NavItemProps): preact
         onClick={handleClick}
       >
         {hasChildren && (
-          <span class={`nav-chevron ${open ? "nav-chevron-open" : ""}`}>
-            &#9656;
-          </span>
+          <svg
+            class={`nav-chevron ${open ? "nav-chevron-open" : ""}`}
+            viewBox="0 0 10 10"
+            width="10"
+            height="10"
+            aria-hidden="true"
+          >
+            <path d="M3.5 2 L6.5 5 L3.5 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         )}
         {node.title}
       </a>
@@ -89,7 +96,7 @@ function NavItem({ node, depth, currentSlug, onNavigate }: NavItemProps): preact
   );
 }
 
-export function Sidebar({ nav, currentSlug, isOpen, onNavigate }: SidebarProps): preact.JSX.Element {
+export function Sidebar({ nav, currentSlug, isOpen, onNavigate, onOpenGraph }: SidebarProps): preact.JSX.Element {
   return (
     <nav class={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
       <div class="sidebar-content">
@@ -99,6 +106,18 @@ export function Sidebar({ nav, currentSlug, isOpen, onNavigate }: SidebarProps):
           </a>
         </div>
         <NavTree nodes={nav} depth={0} currentSlug={currentSlug} onNavigate={onNavigate} />
+        <div class="sidebar-footer">
+          <button class="graph-button" type="button" onClick={onOpenGraph} aria-label="Open graph">
+            <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" class="graph-button-icon">
+              <circle cx="4" cy="10" r="2.2" />
+              <circle cx="16" cy="4" r="2.2" />
+              <circle cx="16" cy="16" r="2.2" />
+              <line x1="4" y1="10" x2="16" y2="4" />
+              <line x1="4" y1="10" x2="16" y2="16" />
+            </svg>
+            Graph
+          </button>
+        </div>
       </div>
     </nav>
   );

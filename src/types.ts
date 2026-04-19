@@ -6,6 +6,8 @@ export type Page = {
   html: string;
   date: string | null;
   updated: string | null;
+  outbound: string[];
+  inbound: string[];
 };
 
 export type NavNode = {
@@ -19,4 +21,21 @@ export type NavNode = {
 export type ContentData = {
   nav: NavNode[];
   pages: Record<string, Page>;
+};
+
+export type GraphNode = {
+  id: string;
+  title: string;
+  group: string;
+  hidden: boolean;
+};
+
+export type GraphEdge = {
+  source: string;
+  target: string;
+};
+
+export type Graph = {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
 };
