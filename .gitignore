@@ -2,5 +2,5 @@ node_modules/
 dist/
 src/content.json
 public/_docs/
-SPECIFICATIONS/
+ROADMAP.md
 *.local
