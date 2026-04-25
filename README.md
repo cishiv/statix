@@ -5,19 +5,18 @@ A static site generator that turns a directory of Markdown files into a navigabl
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-username/statix.git
+git clone https://github.com/cishiv/statix.git
 cd statix
-nvm use 20
-npm install
+bun install
 ```
 
 Add your Markdown files to `docs/`, then:
 
 ```bash
-npm run dev       # start dev server with hot reload
-npm run build     # build static site to dist/
-npm run preview   # preview the built site locally
-npm run test      # run unit tests
+bun run dev       # start dev server with hot reload
+bun run build     # build static site to dist/
+bun run preview   # preview the built site locally
+bun run test      # run unit tests
 ```
 
 ## Writing Content
@@ -97,10 +96,10 @@ Override CSS custom properties to adjust the defaults:
 Push to GitHub, connect the repo in Railway, set the port to `8080`. The included `Dockerfile` handles everything:
 
 ```dockerfile
-FROM node:20-alpine AS build
+FROM oven/bun:1-alpine AS build
 WORKDIR /app
 COPY . .
-RUN npm ci && npm run build
+RUN bun install --frozen-lockfile && bun run build
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
