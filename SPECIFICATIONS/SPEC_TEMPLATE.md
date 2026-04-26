@@ -1,11 +1,23 @@
 ---
-feature: "<short feature name>"
+spec_type: "<detailed | mvp>"
+mode: "<project | feature>"
+name: "<project name in project mode; feature name in feature mode>"
 date_started: "<YYYY-MM-DD>"
-template: "statix"
+template: "<kitchen-sink-ts | kitchen-sink-twotier | statix>"
 status: "NOT_YET_IMPLEMENTED"
 parent_spec: ""
-superseded_by: ""
 ---
+
+<!--
+Frontmatter usage:
+
+- spec_type: "detailed" or "mvp". Detailed specs are produced by /detailed-specification (project) or /extend-features (feature). MVP specs are produced by /mvp-specification.
+- mode: "project" for the first spec of a new repo, "feature" for additions to an existing repo.
+- name: the project name (project mode) or the feature name (feature mode). Used in the filename.
+- parent_spec: relative path from this file to the upstream spec it consumes. Empty only for project-mode detailed specs (which have no upstream — only user input). All other spec types must have parent_spec populated.
+
+See SPECIFICATIONS/HOW_TO_USE_SPECIFICATION.md for filename conventions and the full lifecycle.
+-->
 
 # <Feature name>
 
