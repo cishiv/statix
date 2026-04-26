@@ -43,6 +43,8 @@ A criterion is verifiable if it reduces to one of:
 
 Build and extend agents loop on the criteria up to 3 attempts each. Failure of a `[BLOCKING]` criterion escalates to the user. Failure of `[NICE_TO_HAVE]` surfaces as a warning.
 
+This repo supports two spec modalities: **project mode** (the first detailed and MVP spec for a new repo) and **feature mode** (incremental additions). Mode is declared in the spec frontmatter and reflected in the filename. See `SPECIFICATIONS/HOW_TO_USE_SPECIFICATION.md` for the contract.
+
 ## 2. Architectural Invariants
 
 These are non-negotiable without an explicit amendment to this document
