@@ -8,11 +8,23 @@ This directory holds the specs that drive feature work in this repo. It is used 
 
 Every feature gets a spec before code. Bug fixes and refactors that touch more than 50 lines also get specs.
 
-### Naming
+### Modes and naming
 
-`{FEATURE}_{YYYYMMDD}_SPEC.md`. Use the date the spec was started, not the date of completion. `FEATURE` is uppercase snake_case (e.g. `USER_PROFILE_PAGE`, `STRIPE_INTEGRATION`).
+This repo's specs follow one of two modalities. Filename + frontmatter together identify which mode a spec belongs to.
 
-For MVP specs, `FEATURE` is `MVP`. The MVP's deferred-features sibling is `MVP_{YYYYMMDD}_DEFERRED.md`, also placed in `NOT_YET_IMPLEMENTED/`.
+**Project mode** — the first detailed spec and MVP spec for the repo. There is exactly one of each per project.
+
+- Detailed: `DETAILED_{PROJECT_NAME}_{YYYYMMDD}.md`
+- MVP: `MVP_{YYYYMMDD}_SPEC.md`
+
+**Feature mode** — specs added incrementally to an existing repo. Multiple of each can exist over time.
+
+- Detailed (per feature): `DETAILED_{FEATURE_NAME}_{YYYYMMDD}.md`
+- MVP (per feature): `MVP_{FEATURE_NAME}_{YYYYMMDD}.md`
+
+`PROJECT_NAME` and `FEATURE_NAME` are uppercase snake_case. Use the date the spec was started, not the date of completion.
+
+Out-of-MVP items from a project MVP go into a sibling file `MVP_{YYYYMMDD}_DEFERRED.md`. Out-of-MVP items from a feature MVP go into `MVP_{FEATURE_NAME}_{YYYYMMDD}_DEFERRED.md`.
 
 ### Lifecycle
 
@@ -47,9 +59,25 @@ Specs reference the design via relative path.
 
 Before writing a spec, validate:
 
-1. The target template (declared in frontmatter) matches this repo.
-2. Required upstream artifacts exist. A `parent_spec` reference in frontmatter must resolve to an existing file.
-3. Frontmatter is complete.
+1. The target template (declared in frontmatter `template`) matches this repo.
+2. `spec_type` and `mode` are populated.
+3. `name` matches the filename.
+4. `parent_spec`:
+   - Project-mode detailed specs (`spec_type: detailed`, `mode: project`): must be empty.
+   - All other spec types: must point at an existing file. The path is relative to the spec being written.
+5. Frontmatter is complete YAML.
+6. No filename collision in the target directory.
+
+The mode/parent_spec relationship:
+
+| spec_type | mode    | parent_spec target                                          |
+|-----------|---------|-------------------------------------------------------------|
+| detailed  | project | empty                                                       |
+| mvp       | project | `../NOT_YET_IMPLEMENTED/DETAILED_{PROJECT_NAME}_{...}.md`   |
+| detailed  | feature | `../IMPLEMENTED/IMPLEMENTED_MVP_{...}_SPEC.md`              |
+| mvp       | feature | `../NOT_YET_IMPLEMENTED/DETAILED_{FEATURE_NAME}_{...}.md`   |
+
+A mismatch between filename, `mode`, and `parent_spec` is a hard error. Refuse to write and surface the issue.
 
 ### Validation before implementing from a spec
 
