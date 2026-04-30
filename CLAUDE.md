@@ -34,12 +34,18 @@ follow the lower source.
 
 This repo follows a spec-driven workflow. See `SPECIFICATIONS/HOW_TO_USE_SPECIFICATION.md` for the full lifecycle.
 
-Every spec includes an `ACCEPTANCE_CRITERIA` section at the top. Each criterion is a checklist item tagged `[BLOCKING]` or `[NICE_TO_HAVE]` — untagged criteria default to `[BLOCKING]`.
+Every spec includes an `ACCEPTANCE_CRITERIA` section at the top. Each criterion has:
 
-A criterion is verifiable if it reduces to one of:
+- A sectioned number (e.g. `1.1`, `1.2`, `2.1` — sections group by user flow or domain).
+- A tag: `[BLOCKING]` or `[NICE_TO_HAVE]`. Untagged criteria default to `[BLOCKING]`. An optional `[USER_VERIFIES]` tag marks criteria that can't be machine-verified (typically visual or typographic — common for content sites).
+- A `Pre-conditions:` line stating the world-state required before the criterion applies.
+- The criterion text, written in EARS-flavored prose: `WHEN <event>` / `WHILE <state>` / `WHERE <feature>` / `IF <unwanted condition> THEN` / ubiquitous `the system shall <response>`. Combine patterns when expressive (e.g. `WHEN ... IF ... THEN`).
+
+The build agent picks the verification mechanism per criterion from this repo's menu:
 
 - A command that exits 0 (e.g. `bun run test`, `bun run build`).
 - A built page whose DOM matches a documented assertion.
+- For `[USER_VERIFIES]` criteria: manual user sign-off after the agent presents the built behavior.
 
 Build and extend agents loop on the criteria up to 3 attempts each. Failure of a `[BLOCKING]` criterion escalates to the user. Failure of `[NICE_TO_HAVE]` surfaces as a warning.
 

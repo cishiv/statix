@@ -83,7 +83,7 @@ A mismatch between filename, `mode`, and `parent_spec` is a hard error. Refuse t
 
 Before implementing:
 
-1. The `ACCEPTANCE_CRITERIA` section is present and every criterion is verifiable (reduces to command-exit-0 or HTTP+Zod).
+1. The `ACCEPTANCE_CRITERIA` section is present and every criterion is well-formed: sectioned-numbered, tagged, carries a `Pre-conditions:` line, and is written as EARS-flavored prose. Criteria the agent cannot machine-verify (typically visual or typographic) must carry the `[USER_VERIFIES]` tag.
 2. Architecture hints don't conflict with `CLAUDE.md` principles.
 3. The `Integrations` section is filled in.
 
