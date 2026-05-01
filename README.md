@@ -16,6 +16,7 @@ Add your Markdown files to `docs/`, then:
 bun run dev       # start dev server with hot reload
 bun run build     # build static site to dist/
 bun run preview   # preview the built site locally
+bun run cms       # localhost-only markdown editor for docs/
 bun run test      # run unit tests
 ```
 

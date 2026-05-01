@@ -210,6 +210,10 @@ it.
 | Markdown content              | `docs/`                                      |
 | Generated content (gitignored)| `src/content.json`, `public/_docs/`          |
 | Vite config + plugins         | `vite.config.ts`                             |
+| CMS server (localhost-only)   | `cms/server.ts`                              |
+| CMS API handlers              | `cms/api/{docs,move,preview,links,git}.ts`   |
+| CMS UI                        | `cms/ui/` (Preact + CodeMirror 6)            |
+| Path-safety helper            | `cms/path-safety.ts`                         |
 | Deploy                        | `Dockerfile`, `nginx.conf`                   |
 | Spec workflow                 | `SPECIFICATIONS/HOW_TO_USE_SPECIFICATION.md` |
 
@@ -220,6 +224,7 @@ it.
 | `bun run dev`         | Vite dev server with hot reload        |
 | `bun run build`       | Build static site to `dist/`           |
 | `bun run preview`     | Preview the built site locally         |
+| `bun run cms`         | Localhost-only markdown editor (`docs/`) |
 | `bun run test`        | Vitest (run once)                      |
 | `bun run test:watch`  | Vitest (watch mode)                    |
 
