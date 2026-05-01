@@ -8,6 +8,8 @@ import {
   writeDocFile,
 } from "./api/docs.ts";
 import { moveDoc } from "./api/move.ts";
+import { renderPreview } from "./api/preview.ts";
+import { listLinks } from "./api/links.ts";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
@@ -69,7 +71,36 @@ async function handleRequest(req: Request): Promise<Response> {
     return handleMoveRequest(req);
   }
 
+  if (pathname === "/api/links" && method === "GET") {
+    const links = await listLinks(DOCS_DIR);
+    return Response.json({ links });
+  }
+
+  if (pathname === "/api/preview" && method === "POST") {
+    return handlePreviewRequest(req);
+  }
+
   return new Response("Not found", { status: 404 });
+}
+
+async function handlePreviewRequest(req: Request): Promise<Response> {
+  let payload: unknown;
+  try {
+    payload = await req.json();
+  } catch {
+    return jsonError(400, "invalid json");
+  }
+  const { body, path: rel } = (payload ?? {}) as {
+    body?: unknown;
+    path?: unknown;
+  };
+  if (typeof body !== "string" || typeof rel !== "string") {
+    return jsonError(400, "body and path required");
+  }
+  if (!rel.endsWith(".md")) return jsonError(400, "path must end in .md");
+  if (!safeJoin(DOCS_DIR, rel)) return jsonError(400, "invalid path");
+  const html = await renderPreview(body, rel, DOCS_DIR);
+  return Response.json({ html });
 }
 
 async function handleMoveRequest(req: Request): Promise<Response> {

@@ -212,7 +212,7 @@ export function parsePageMeta(
   return { slug, title, order, hidden, date, updated, group, hideInGraph, filename, filePath, body };
 }
 
-function renderPageHtml(
+export function renderPageHtml(
   meta: PageMeta,
   docsDir: string,
   wikilinkEnv: WikilinkEnv
