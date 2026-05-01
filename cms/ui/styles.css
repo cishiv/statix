@@ -67,7 +67,7 @@ button:disabled {
 
 .cms-shell {
   display: grid;
-  grid-template-rows: 1fr;
+  grid-template-rows: 1fr auto;
   height: 100vh;
 }
 
@@ -228,6 +228,140 @@ button:disabled {
 
 .cm-host .cm-scroller {
   font-family: inherit;
+}
+
+/* preview */
+
+.preview {
+  padding: 24px 28px;
+  overflow: auto;
+  height: 100%;
+  line-height: 1.6;
+}
+
+.preview h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.preview h2 {
+  font-size: 17px;
+  margin-top: 1.6em;
+}
+
+.preview h3 {
+  font-size: 15px;
+}
+
+.preview a {
+  color: var(--accent);
+}
+
+.preview .wikilink-broken {
+  color: var(--danger);
+  border-bottom: 1px dotted var(--danger);
+}
+
+.preview pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.preview code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.92em;
+}
+
+.preview blockquote {
+  border-left: 3px solid var(--border);
+  margin: 1em 0;
+  padding: 0.2em 1em;
+  color: var(--muted);
+}
+
+/* commit bar */
+
+.commit-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.commit-status {
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.commit-clean {
+  font-style: italic;
+}
+
+.commit-summary {
+  margin-bottom: 6px;
+}
+
+.commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 96px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.commit-row {
+  display: flex;
+  gap: 10px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.commit-row.staged {
+  color: var(--fg);
+}
+
+.commit-mark {
+  color: var(--accent);
+  width: 24px;
+}
+
+.commit-path {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.commit-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.commit-message {
+  font: inherit;
+  padding: 6px 10px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 280px;
+}
+
+.commit-message:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-color: var(--accent);
 }
 
 /* error toast */

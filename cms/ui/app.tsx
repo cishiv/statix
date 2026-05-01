@@ -1,6 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { Tree } from "./components/Tree.tsx";
 import { Editor } from "./components/Editor.tsx";
+import { Preview } from "./components/Preview.tsx";
+import { CommitBar } from "./components/CommitBar.tsx";
 import {
   deleteDoc,
   fetchDoc,
@@ -21,12 +23,14 @@ export function App() {
   const [body, setBody] = useState<string>("");
   const [savedBody, setSavedBody] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [statusVersion, setStatusVersion] = useState<number>(0);
   const dirty = body !== savedBody;
 
   const reload = async (): Promise<void> => {
     const [t, l] = await Promise.all([fetchTree(), fetchLinks()]);
     setTree(t);
     setLinks(l);
+    setStatusVersion((v) => v + 1);
   };
 
   useEffect(() => {
@@ -139,9 +143,17 @@ export function App() {
           )}
         </section>
         <section class="cms-pane">
-          <div class="cms-empty">Preview (slice 9)</div>
+          {selected ? (
+            <Preview body={body} path={selected} />
+          ) : (
+            <div class="cms-empty">Preview appears here</div>
+          )}
         </section>
       </div>
+      <CommitBar
+        reloadKey={statusVersion}
+        onCommitted={() => setStatusVersion((v) => v + 1)}
+      />
       {error && (
         <div class="error-toast" onClick={() => setError(null)}>
           {error}

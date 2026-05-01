@@ -74,3 +74,55 @@ export async function moveDoc(from: string, to: string): Promise<void> {
     "rename"
   );
 }
+
+export async function fetchPreview(
+  body: string,
+  path: string
+): Promise<string> {
+  const r = await expectOk(
+    await fetch("/api/preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body, path }),
+    }),
+    "preview"
+  );
+  const data = await r.json();
+  return data.html as string;
+}
+
+export type GitStatusEntry = {
+  path: string;
+  index: string;
+  worktree: string;
+};
+
+export async function fetchGitStatus(): Promise<GitStatusEntry[]> {
+  const r = await expectOk(await fetch("/api/git/status"), "git status");
+  const data = await r.json();
+  return data.entries as GitStatusEntry[];
+}
+
+export async function stageDocs(paths: string[]): Promise<void> {
+  await expectOk(
+    await fetch("/api/git/stage", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ paths }),
+    }),
+    "stage"
+  );
+}
+
+export async function commitDocs(message: string): Promise<{ sha?: string }> {
+  const r = await expectOk(
+    await fetch("/api/git/commit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message }),
+    }),
+    "commit"
+  );
+  const data = await r.json();
+  return { sha: data.sha as string | undefined };
+}
