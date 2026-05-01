@@ -1,5 +1,5 @@
 import path from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { safeJoin } from "./path-safety.ts";
 import {
   deleteDocFile,
@@ -15,6 +15,22 @@ import { gitCommit, gitStage, gitStatus } from "./api/git.ts";
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
 const DOCS_DIR = path.resolve("docs");
+const UI_DIR = path.resolve("cms/ui");
+
+const indexHtml = readFileSync(path.join(UI_DIR, "index.html"), "utf-8");
+const stylesCss = readFileSync(path.join(UI_DIR, "styles.css"), "utf-8");
+
+const buildResult = await Bun.build({
+  entrypoints: [path.join(UI_DIR, "main.tsx")],
+  target: "browser",
+  format: "esm",
+});
+if (!buildResult.success) {
+  console.error("CMS UI build failed:");
+  for (const log of buildResult.logs) console.error(log);
+  process.exit(1);
+}
+const bundleText = await buildResult.outputs[0].text();
 
 function jsonError(status: number, message: string): Response {
   return Response.json({ error: message }, { status });
@@ -57,6 +73,22 @@ async function handleRequest(req: Request): Promise<Response> {
 
   if (pathname === "/api/health" && method === "GET") {
     return Response.json({ ok: true });
+  }
+
+  if (method === "GET" && (pathname === "/" || pathname === "/index.html")) {
+    return new Response(indexHtml, {
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  }
+  if (method === "GET" && pathname === "/styles.css") {
+    return new Response(stylesCss, {
+      headers: { "content-type": "text/css; charset=utf-8" },
+    });
+  }
+  if (method === "GET" && pathname === "/cms.js") {
+    return new Response(bundleText, {
+      headers: { "content-type": "application/javascript; charset=utf-8" },
+    });
   }
 
   if (pathname === "/api/tree" && method === "GET") {
