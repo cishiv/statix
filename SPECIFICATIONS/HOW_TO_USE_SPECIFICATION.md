@@ -70,12 +70,12 @@ Before writing a spec, validate:
 
 The mode/parent_spec relationship:
 
-| spec_type | mode    | parent_spec target                                          |
-|-----------|---------|-------------------------------------------------------------|
-| detailed  | project | empty                                                       |
-| mvp       | project | `../NOT_YET_IMPLEMENTED/DETAILED_{PROJECT_NAME}_{...}.md`   |
-| detailed  | feature | `../IMPLEMENTED/IMPLEMENTED_MVP_{...}_SPEC.md`              |
-| mvp       | feature | `../NOT_YET_IMPLEMENTED/DETAILED_{FEATURE_NAME}_{...}.md`   |
+| spec_type | mode    | parent_spec target                                                                                                                          |
+|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| detailed  | project | empty                                                                                                                                       |
+| mvp       | project | `../NOT_YET_IMPLEMENTED/DETAILED_{PROJECT_NAME}_{...}.md`                                                                                   |
+| detailed  | feature | most relevant `../IMPLEMENTED/IMPLEMENTED_DETAILED_*.md` (project-mode preferred when available); fallback to `../IMPLEMENTED/IMPLEMENTED_MVP_*.md` |
+| mvp       | feature | `../NOT_YET_IMPLEMENTED/DETAILED_{FEATURE_NAME}_{...}.md`                                                                                   |
 
 A mismatch between filename, `mode`, and `parent_spec` is a hard error. Refuse to write and surface the issue.
 
