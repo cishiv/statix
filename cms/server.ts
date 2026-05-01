@@ -10,6 +10,7 @@ import {
 import { moveDoc } from "./api/move.ts";
 import { renderPreview } from "./api/preview.ts";
 import { listLinks } from "./api/links.ts";
+import { gitCommit, gitStage, gitStatus } from "./api/git.ts";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
@@ -80,7 +81,72 @@ async function handleRequest(req: Request): Promise<Response> {
     return handlePreviewRequest(req);
   }
 
+  if (pathname === "/api/git/status" && method === "GET") {
+    return handleGitStatus();
+  }
+
+  if (pathname === "/api/git/stage" && method === "POST") {
+    return handleGitStage(req);
+  }
+
+  if (pathname === "/api/git/commit" && method === "POST") {
+    return handleGitCommit(req);
+  }
+
   return new Response("Not found", { status: 404 });
+}
+
+async function handleGitStatus(): Promise<Response> {
+  try {
+    const raw = await gitStatus(process.cwd(), DOCS_DIR);
+    const entries = raw.map((e) => ({
+      path: e.path.startsWith("docs/") ? e.path.slice(5) : e.path,
+      index: e.index,
+      worktree: e.worktree,
+    }));
+    return Response.json({ entries });
+  } catch (e) {
+    return jsonError(500, e instanceof Error ? e.message : "git error");
+  }
+}
+
+async function handleGitStage(req: Request): Promise<Response> {
+  let payload: unknown;
+  try {
+    payload = await req.json();
+  } catch {
+    return jsonError(400, "invalid json");
+  }
+  const { paths } = (payload ?? {}) as { paths?: unknown };
+  if (!Array.isArray(paths) || paths.length === 0) {
+    return jsonError(400, "paths required");
+  }
+  const repoPaths: string[] = [];
+  for (const p of paths) {
+    if (typeof p !== "string") return jsonError(400, "paths must be strings");
+    const abs = safeJoin(DOCS_DIR, p);
+    if (!abs) return jsonError(400, `path outside docs/: ${p}`);
+    repoPaths.push(path.relative(process.cwd(), abs));
+  }
+  const result = await gitStage(process.cwd(), repoPaths);
+  if (!result.ok) return jsonError(500, result.error);
+  return Response.json({ ok: true });
+}
+
+async function handleGitCommit(req: Request): Promise<Response> {
+  let payload: unknown;
+  try {
+    payload = await req.json();
+  } catch {
+    return jsonError(400, "invalid json");
+  }
+  const { message } = (payload ?? {}) as { message?: unknown };
+  if (typeof message !== "string" || message.trim() === "") {
+    return jsonError(400, "non-empty commit message required");
+  }
+  const result = await gitCommit(process.cwd(), message);
+  if (!result.ok) return jsonError(500, result.error);
+  return Response.json({ ok: true, sha: result.sha });
 }
 
 async function handlePreviewRequest(req: Request): Promise<Response> {
