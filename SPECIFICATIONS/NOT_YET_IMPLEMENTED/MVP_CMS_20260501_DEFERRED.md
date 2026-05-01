@@ -1,6 +1,7 @@
 # CMS — Deferred (from MVP)
 
-Items deferred from `./MVP_CMS_20260501.md`. Sourced from
+Items deferred from
+`../IMPLEMENTED/IMPLEMENTED_MVP_CMS_20260501.md`. Sourced from
 `./DETAILED_CMS_20260501.md`.
 
 This file is a backlog, not a typed spec — no frontmatter on purpose.

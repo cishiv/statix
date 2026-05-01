@@ -4,15 +4,15 @@ mode: "feature"
 name: "CMS"
 date_started: "2026-05-01"
 template: "statix"
-status: "NOT_YET_IMPLEMENTED"
-parent_spec: "./DETAILED_CMS_20260501.md"
+status: "IMPLEMENTED"
+parent_spec: "../NOT_YET_IMPLEMENTED/DETAILED_CMS_20260501.md"
 ---
 
 # CMS — MVP
 
 The minimum viable slice of the CMS. The full vision lives in
-`./DETAILED_CMS_20260501.md`. Deferred items live in
-`./MVP_CMS_20260501_DEFERRED.md`.
+`../NOT_YET_IMPLEMENTED/DETAILED_CMS_20260501.md`. Deferred items
+live in `../NOT_YET_IMPLEMENTED/MVP_CMS_20260501_DEFERRED.md`.
 
 ## ACCEPTANCE_CRITERIA
 
@@ -114,7 +114,7 @@ WHEN `bun run build` runs, the system shall not include any CMS artefacts in `di
 
 ## Problem statement
 
-See `./DETAILED_CMS_20260501.md`.
+See `../NOT_YET_IMPLEMENTED/DETAILED_CMS_20260501.md`.
 
 ## User flows
 
@@ -138,14 +138,16 @@ See the detailed spec. The MVP is implementable in:
 ## Integrations
 
 - `scripts/markdown-wikilink.ts`, `scripts/wikilink-resolver.ts` for
-  preview.
-- Git via `Bun.$`.
-- CodeMirror 6 (`@codemirror/lang-markdown`,
+  preview (via `renderPageHtml` exported from `build-content.ts`).
+- Git via `node:child_process` (works under both Bun runtime and
+  Node, the latter for vitest).
+- CodeMirror 6 (`codemirror`, `@codemirror/lang-markdown`,
   `@codemirror/autocomplete`).
 
 ## Out of scope
 
-Tracked in `./MVP_CMS_20260501_DEFERRED.md`. Headlines:
+Tracked in `../NOT_YET_IMPLEMENTED/MVP_CMS_20260501_DEFERRED.md`.
+Headlines:
 
 - Visual-fidelity polish for the preview pane (USER_VERIFIES).
 - Auto-open browser on `bun run cms`.
