@@ -7,6 +7,7 @@ import {
   readDocFile,
   writeDocFile,
 } from "./api/docs.ts";
+import { moveDoc } from "./api/move.ts";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
@@ -64,7 +65,33 @@ async function handleRequest(req: Request): Promise<Response> {
     return handleDocRequest(req, url);
   }
 
+  if (pathname === "/api/doc/move" && method === "POST") {
+    return handleMoveRequest(req);
+  }
+
   return new Response("Not found", { status: 404 });
+}
+
+async function handleMoveRequest(req: Request): Promise<Response> {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return jsonError(400, "invalid json");
+  }
+  const { from, to } = (body ?? {}) as { from?: unknown; to?: unknown };
+  if (typeof from !== "string" || typeof to !== "string") {
+    return jsonError(400, "from and to are required strings");
+  }
+  if (!from.endsWith(".md") || !to.endsWith(".md")) {
+    return jsonError(400, "paths must end in .md");
+  }
+  const fromAbs = safeJoin(DOCS_DIR, from);
+  const toAbs = safeJoin(DOCS_DIR, to);
+  if (!fromAbs || !toAbs) return jsonError(400, "invalid path");
+  const result = await moveDoc(DOCS_DIR, fromAbs, toAbs);
+  if (!result.ok) return jsonError(400, result.reason);
+  return Response.json({ ok: true, rewrites: result.rewrites });
 }
 
 const server = Bun.serve({
