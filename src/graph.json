@@ -1,6 +1,12 @@
 {
   "nodes": [
     {
+      "id": "/CMS",
+      "title": "Statix CMS",
+      "group": "CMS",
+      "hidden": false
+    },
+    {
       "id": "/getting-started/configuration",
       "title": "Configuration",
       "group": "getting-started",
