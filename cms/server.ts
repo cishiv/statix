@@ -229,4 +229,21 @@ const server = Bun.serve({
   fetch: (req) => handleRequest(req),
 });
 
-console.log(`statix cms → http://${server.hostname}:${server.port}`);
+const editorUrl = `http://${server.hostname}:${server.port}`;
+console.log(`statix cms → ${editorUrl}`);
+
+function openBrowser(url: string): void {
+  const cmd =
+    process.platform === "darwin"
+      ? ["open", url]
+      : process.platform === "win32"
+        ? ["cmd", "/c", "start", "", url]
+        : ["xdg-open", url];
+  try {
+    Bun.spawn(cmd, { stdout: null, stderr: null }).unref();
+  } catch {
+    // opener not available; user can navigate manually
+  }
+}
+
+openBrowser(editorUrl);
