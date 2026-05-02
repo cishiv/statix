@@ -1,3 +1,4 @@
+import { useState } from "preact/hooks";
 import type { DocSummary } from "../api.ts";
 
 type TreeProps = {
@@ -10,6 +11,19 @@ type TreeProps = {
 };
 
 export function Tree(props: TreeProps) {
+  const [query, setQuery] = useState("");
+
+  const visible =
+    query.trim() === ""
+      ? props.docs
+      : props.docs.filter((d) => {
+          const q = query.toLowerCase();
+          return (
+            d.title.toLowerCase().includes(q) ||
+            d.path.toLowerCase().includes(q)
+          );
+        });
+
   return (
     <div class="tree">
       <div class="tree-header">
@@ -18,8 +32,17 @@ export function Tree(props: TreeProps) {
           + new
         </button>
       </div>
+      <div class="tree-search-wrap">
+        <input
+          class="tree-search"
+          type="search"
+          placeholder="filter…"
+          value={query}
+          onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+        />
+      </div>
       <ul class="tree-list">
-        {props.docs.map((d) => (
+        {visible.map((d) => (
           <li
             key={d.path}
             class={

@@ -121,6 +121,28 @@ button:disabled {
   color: var(--muted);
 }
 
+.tree-search-wrap {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tree-search {
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.tree-search:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-color: var(--accent);
+}
+
 .tree-list {
   list-style: none;
   margin: 0;
