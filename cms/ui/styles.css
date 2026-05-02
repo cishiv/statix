@@ -193,6 +193,17 @@ button:disabled {
   max-width: 100%;
 }
 
+.tree-doc-snippet {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .tree-actions {
   display: flex;
   gap: 2px;

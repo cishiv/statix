@@ -37,6 +37,21 @@ export async function fetchLinks(): Promise<LinkEntry[]> {
   return data.links as LinkEntry[];
 }
 
+export type SearchHit = {
+  path: string;
+  title: string;
+  snippet: string;
+};
+
+export async function fetchSearch(query: string): Promise<SearchHit[]> {
+  const r = await expectOk(
+    await fetch(`/api/search?q=${encodeURIComponent(query)}`),
+    "search"
+  );
+  const data = await r.json();
+  return data.hits as SearchHit[];
+}
+
 export async function fetchDoc(path: string): Promise<string> {
   const r = await expectOk(
     await fetch(`/api/doc?path=${encodeURIComponent(path)}`),

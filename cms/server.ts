@@ -24,6 +24,7 @@ import { renderPreview } from "./api/preview.ts";
 import { listLinks } from "./api/links.ts";
 import { gitCommit, gitPush, gitStage, gitStatus } from "./api/git.ts";
 import { saveImage } from "./api/image.ts";
+import { searchBodies } from "./api/search.ts";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
@@ -125,6 +126,12 @@ async function handleRequest(req: Request): Promise<Response> {
   if (pathname === "/api/links" && method === "GET") {
     const links = await listLinks(DOCS_DIR);
     return Response.json({ links });
+  }
+
+  if (pathname === "/api/search" && method === "GET") {
+    const q = url.searchParams.get("q") ?? "";
+    const hits = await searchBodies(DOCS_DIR, q);
+    return Response.json({ hits });
   }
 
   if (pathname === "/api/preview" && method === "POST") {
