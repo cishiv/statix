@@ -1,6 +1,18 @@
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { safeJoin } from "./path-safety.ts";
+
+const hljsLightPath = new URL(
+  import.meta.resolve("highlight.js/styles/github.css")
+).pathname;
+const hljsDarkPath = new URL(
+  import.meta.resolve("highlight.js/styles/github-dark.css")
+).pathname;
+const hljsCss =
+  readFileSync(hljsLightPath, "utf-8") +
+  "\n@media (prefers-color-scheme: dark) {\n" +
+  readFileSync(hljsDarkPath, "utf-8") +
+  "\n}";
 import {
   deleteDocFile,
   listDocs,
@@ -82,6 +94,11 @@ async function handleRequest(req: Request): Promise<Response> {
   }
   if (method === "GET" && pathname === "/styles.css") {
     return new Response(stylesCss, {
+      headers: { "content-type": "text/css; charset=utf-8" },
+    });
+  }
+  if (method === "GET" && pathname === "/hljs.css") {
+    return new Response(hljsCss, {
       headers: { "content-type": "text/css; charset=utf-8" },
     });
   }
@@ -229,4 +246,21 @@ const server = Bun.serve({
   fetch: (req) => handleRequest(req),
 });
 
-console.log(`statix cms → http://${server.hostname}:${server.port}`);
+const editorUrl = `http://${server.hostname}:${server.port}`;
+console.log(`statix cms → ${editorUrl}`);
+
+function openBrowser(url: string): void {
+  const cmd =
+    process.platform === "darwin"
+      ? ["open", url]
+      : process.platform === "win32"
+        ? ["cmd", "/c", "start", "", url]
+        : ["xdg-open", url];
+  try {
+    Bun.spawn(cmd, { stdout: null, stderr: null }).unref();
+  } catch {
+    // opener not available; user can navigate manually
+  }
+}
+
+openBrowser(editorUrl);
