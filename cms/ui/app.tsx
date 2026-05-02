@@ -10,6 +10,7 @@ import {
   fetchTree,
   moveDoc,
   saveDoc,
+  uploadImage,
   type DocSummary,
   type LinkEntry,
 } from "./api.ts";
@@ -90,6 +91,21 @@ export function App() {
     }
   };
 
+  const handleUploadImage = async (file: File): Promise<string> => {
+    if (!selected) {
+      setError("select a doc before dropping images");
+      return "";
+    }
+    try {
+      const md = await uploadImage(file, selected);
+      await reload();
+      return md;
+    } catch (e) {
+      setError(toMessage(e));
+      return "";
+    }
+  };
+
   const handleRename = async (from: string): Promise<void> => {
     const raw = window.prompt(`Rename / move ${from} to:`, from);
     const to = raw?.trim();
@@ -136,7 +152,12 @@ export function App() {
                   save
                 </button>
               </div>
-              <Editor value={body} onChange={setBody} links={links} />
+              <Editor
+                value={body}
+                onChange={setBody}
+                links={links}
+                onUploadImage={handleUploadImage}
+              />
             </div>
           ) : (
             <div class="cms-empty">Select a doc to edit</div>

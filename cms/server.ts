@@ -23,6 +23,7 @@ import { moveDoc } from "./api/move.ts";
 import { renderPreview } from "./api/preview.ts";
 import { listLinks } from "./api/links.ts";
 import { gitCommit, gitStage, gitStatus } from "./api/git.ts";
+import { saveImage } from "./api/image.ts";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 5174;
@@ -142,7 +143,35 @@ async function handleRequest(req: Request): Promise<Response> {
     return handleGitCommit(req);
   }
 
+  if (pathname === "/api/image" && method === "POST") {
+    return handleImageUpload(req);
+  }
+
   return new Response("Not found", { status: 404 });
+}
+
+async function handleImageUpload(req: Request): Promise<Response> {
+  let formData: FormData;
+  try {
+    formData = await req.formData();
+  } catch {
+    return jsonError(400, "invalid form data");
+  }
+  const file = formData.get("file");
+  const docPath = formData.get("docPath");
+  if (!(file instanceof File)) return jsonError(400, "file required");
+  if (typeof docPath !== "string") return jsonError(400, "docPath required");
+  const result = await saveImage(
+    DOCS_DIR,
+    docPath,
+    file.name,
+    await file.arrayBuffer()
+  );
+  if (!result.ok) return jsonError(result.status, result.error);
+  return Response.json({
+    markdown: result.markdown,
+    savedPath: result.savedPath,
+  });
 }
 
 async function handleGitStatus(): Promise<Response> {

@@ -114,6 +114,21 @@ export async function stageDocs(paths: string[]): Promise<void> {
   );
 }
 
+export async function uploadImage(
+  file: File,
+  docPath: string
+): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("docPath", docPath);
+  const r = await expectOk(
+    await fetch("/api/image", { method: "POST", body: formData }),
+    "image upload"
+  );
+  const data = await r.json();
+  return data.markdown as string;
+}
+
 export async function commitDocs(message: string): Promise<{ sha?: string }> {
   const r = await expectOk(
     await fetch("/api/git/commit", {

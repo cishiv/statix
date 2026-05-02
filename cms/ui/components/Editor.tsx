@@ -12,6 +12,7 @@ type EditorProps = {
   value: string;
   onChange: (next: string) => void;
   links: LinkEntry[];
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
 export function Editor(props: EditorProps) {
@@ -19,9 +20,35 @@ export function Editor(props: EditorProps) {
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(props.onChange);
   const linksRef = useRef(props.links);
+  const onUploadImageRef = useRef(props.onUploadImage);
 
   onChangeRef.current = props.onChange;
   linksRef.current = props.links;
+  onUploadImageRef.current = props.onUploadImage;
+
+  const handleDrop = async (e: DragEvent): Promise<void> => {
+    if (!e.dataTransfer || !onUploadImageRef.current) return;
+    const files = Array.from(e.dataTransfer.files).filter((f) =>
+      f.type.startsWith("image/")
+    );
+    if (files.length === 0) return;
+    e.preventDefault();
+    const view = viewRef.current;
+    if (!view) return;
+    for (const file of files) {
+      const md = await onUploadImageRef.current(file);
+      if (!md) continue;
+      const pos = view.state.selection.main.head;
+      view.dispatch({
+        changes: { from: pos, insert: md },
+        selection: { anchor: pos + md.length },
+      });
+    }
+  };
+
+  const handleDragOver = (e: DragEvent): void => {
+    if (e.dataTransfer?.types.includes("Files")) e.preventDefault();
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -61,7 +88,14 @@ export function Editor(props: EditorProps) {
     }
   }, [props.value]);
 
-  return <div class="cm-host" ref={containerRef} />;
+  return (
+    <div
+      class="cm-host"
+      ref={containerRef}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    />
+  );
 }
 
 function wikilinkSource(linksRef: { current: LinkEntry[] }) {
