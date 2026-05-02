@@ -1,6 +1,18 @@
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { safeJoin } from "./path-safety.ts";
+
+const hljsLightPath = new URL(
+  import.meta.resolve("highlight.js/styles/github.css")
+).pathname;
+const hljsDarkPath = new URL(
+  import.meta.resolve("highlight.js/styles/github-dark.css")
+).pathname;
+const hljsCss =
+  readFileSync(hljsLightPath, "utf-8") +
+  "\n@media (prefers-color-scheme: dark) {\n" +
+  readFileSync(hljsDarkPath, "utf-8") +
+  "\n}";
 import {
   deleteDocFile,
   listDocs,
@@ -82,6 +94,11 @@ async function handleRequest(req: Request): Promise<Response> {
   }
   if (method === "GET" && pathname === "/styles.css") {
     return new Response(stylesCss, {
+      headers: { "content-type": "text/css; charset=utf-8" },
+    });
+  }
+  if (method === "GET" && pathname === "/hljs.css") {
+    return new Response(hljsCss, {
       headers: { "content-type": "text/css; charset=utf-8" },
     });
   }
