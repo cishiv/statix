@@ -6,32 +6,38 @@ Items deferred from
 
 This file is a backlog, not a typed spec — no frontmatter on purpose.
 
-## Preview polish
+## Shipped after the MVP (kept here for traceability)
 
-- **Visual fidelity** [USER_VERIFIES]: preview pane should match a
-  published page's font, spacing, heading rhythm, and link styling.
-  The MVP renders correctly via the shared pipeline but does not
-  target pixel-equivalence.
+Two batches of deferred items have landed on `main`:
 
-## UX niceties
+- Batch 1 (PR #3, merged 2026-05-02): auto-open browser on
+  `bun run cms`, tree filter / search by title and path,
+  syntax-highlighting stylesheet for the preview pane.
+- Batch 2 (commits direct to `main`, 2026-05-02): drag-and-drop image
+  upload, `git push` endpoint + button, body search across all docs
+  (merged into the existing tree filter with snippet display).
 
-- **Auto-open browser** when `bun run cms` starts.
-- **Tree filter / search** by path or title.
+## Still deferred
 
-## Authoring
+### Authoring
 
 - **Frontmatter form UI**: typed fields per `README.md` instead of
   YAML editing in the body.
-- **Image upload**: drag-and-drop into the editor with files written
-  next to the doc.
 
-## Git
+### Git
 
-- **Push / pull / branch** operations.
+- **Pull / fetch / branch** operations. Push shipped in batch 2;
+  the rest of the git surface beyond commit + push is still manual.
 - **Diff viewer** before stage.
 
-## Larger ideas
+### Preview polish
 
-- **Body search** across all docs.
+- **Visual fidelity** [USER_VERIFIES]: preview pane should match a
+  published page's font, spacing, heading rhythm, and link styling.
+  Batch 1 added syntax highlighting for code blocks; the rest of the
+  visual parity work is still TODO.
+
+### Larger ideas
+
 - **Multi-user / auth**: would only matter if the CMS ever leaves
   localhost — not planned.
