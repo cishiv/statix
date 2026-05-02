@@ -44,6 +44,15 @@ export async function gitCommit(
   }
 }
 
+export async function gitPush(cwd: string): Promise<GitResult> {
+  try {
+    await runGit(["push"], cwd);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export function parsePorcelain(stdout: string): GitStatusEntry[] {
   const entries: GitStatusEntry[] = [];
   const records = stdout.split("\0");

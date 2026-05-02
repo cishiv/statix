@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import {
   commitDocs,
   fetchGitStatus,
+  pushChanges,
   stageDocs,
   type GitStatusEntry,
 } from "../api.ts";
@@ -64,6 +65,17 @@ export function CommitBar(props: CommitBarProps) {
     }
   };
 
+  const handlePush = async (): Promise<void> => {
+    setBusy(true);
+    try {
+      await pushChanges();
+    } catch (e) {
+      setError(toMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div class="commit-bar">
       <div class="commit-status">
@@ -109,6 +121,9 @@ export function CommitBar(props: CommitBarProps) {
           disabled={busy || !message.trim() || stagedCount === 0}
         >
           commit
+        </button>
+        <button onClick={handlePush} disabled={busy}>
+          push
         </button>
       </div>
       {error && (

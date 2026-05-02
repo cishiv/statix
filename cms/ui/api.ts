@@ -141,3 +141,10 @@ export async function commitDocs(message: string): Promise<{ sha?: string }> {
   const data = await r.json();
   return { sha: data.sha as string | undefined };
 }
+
+export async function pushChanges(): Promise<void> {
+  await expectOk(
+    await fetch("/api/git/push", { method: "POST" }),
+    "push"
+  );
+}

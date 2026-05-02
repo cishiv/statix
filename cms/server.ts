@@ -22,7 +22,7 @@ import {
 import { moveDoc } from "./api/move.ts";
 import { renderPreview } from "./api/preview.ts";
 import { listLinks } from "./api/links.ts";
-import { gitCommit, gitStage, gitStatus } from "./api/git.ts";
+import { gitCommit, gitPush, gitStage, gitStatus } from "./api/git.ts";
 import { saveImage } from "./api/image.ts";
 
 const HOSTNAME = "127.0.0.1";
@@ -141,6 +141,12 @@ async function handleRequest(req: Request): Promise<Response> {
 
   if (pathname === "/api/git/commit" && method === "POST") {
     return handleGitCommit(req);
+  }
+
+  if (pathname === "/api/git/push" && method === "POST") {
+    const result = await gitPush(process.cwd());
+    if (!result.ok) return jsonError(500, result.error);
+    return Response.json({ ok: true });
   }
 
   if (pathname === "/api/image" && method === "POST") {
